@@ -1,10 +1,10 @@
 ---
 ami_id: 'ami-096cb92bb3580c759'
 
-
-- hosts: localhost
+- name: Create EC2 instaces
+  hosts: localhost
   connection: local
-  gather_facts: False
+  gather_facts: false
 
   tasks:
     - name: Provision a set of instances
