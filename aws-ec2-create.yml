@@ -1,26 +1,26 @@
 ---
 ami_id: 'ami-096cb92bb3580c759'
 
-- name: Create EC2 instaces
-  hosts: localhost
-  connection: local
-  gather_facts: false
+  - name: Create EC2 instaces
+    hosts: localhost
+    connection: local
+    gather_facts: false
 
-  tasks:
-    - name: Provision a set of instances
-          ec2:
-            key_name: my_key
-            group: test
-            instance_type: t2.micro
-            image: "{{ ami_id }}"
-            wait: true
-            exact_count: 1
-            count_tag:
-                Name: Demo
-            instance_tags:
-                Name: Demo
-          register: ec2
+    tasks:
+      - name: Provision a set of instances
+            ec2:
+              key_name: my_key
+              group: test
+              instance_type: t2.micro
+              image: "{{ ami_id }}"
+              wait: true
+              exact_count: 1
+              count_tag:
+                  Name: Demo
+              instance_tags:
+                  Name: Demo
+            register: ec2
 
-    - name: Add all instance public IPs to host group
-      add_host: hostname={{ item.public_ip }} groups=ec2hosts
-      with_items: "{{ ec2.instances }}"
+      - name: Add all instance public IPs to host group
+        add_host: hostname={{ item.public_ip }} groups=ec2hosts
+        with_items: "{{ ec2.instances }}"
