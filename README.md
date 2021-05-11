@@ -18,3 +18,5 @@ export AWS_SECRET_ACCESS_KEY=''
 ```
 
 Далее на машину обязательно ставим `python3-pip` и библиотеку `boto`, это нужно чтобы Ansible мог выполнять действия с EC2
+
+`pip3 install boto3`

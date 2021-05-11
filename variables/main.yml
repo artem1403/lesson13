@@ -3,4 +3,4 @@ region_name: us-east-2
 key_name: my_keys
 ami_id: ami-096cb92bb3580c759
 instance_type: t2.micro
-s3_bucket_name: s3://mybacketartem.test14.com
+s3_bucket_name: mybacketartem.test14.com
