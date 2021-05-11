@@ -1,16 +1,21 @@
 ---
 - hosts: localhost
   connection: local
+  vars_files:
+    - ./vars/main.yml
   gather_facts: false
-  vars:
-    ami_id: 'ami-096cb92bb3580c759'
 
   tasks:
+    - name: Create a new EC2 key pair for Staging and Production environments
+      ec2_key:
+        name: "{{ key_name }}"
+        region: "{{ region_name }}"
+      register: ec2_key
     - name: Provision a set of instances
       ec2:
         key_name: my_key2
         group: test
-        instance_type: t2.micro
+        instance_type: "{{ instance_type }}"
         image: "{{ ami_id }}"
         wait: true
         exact_count: 1

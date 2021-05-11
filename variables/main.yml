@@ -1,0 +1,4 @@
+---
+region_name: us-east-2
+ami_id: ami-096cb92bb3580c759
+instance_type: t2.micro
