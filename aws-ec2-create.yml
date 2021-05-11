@@ -116,13 +116,13 @@
        clone: yes
 
     - name: Build Webapp
-      command: mvn -f "{{ local_git_dest }}"/pom.xml clean package
+      command: mvn -f {{ local_git_dest }}/pom.xml clean package
 
     - name: Ensure Webapp is uploaded to S3 bucket
       aws_s3:
         bucket: "{{ s3_bucket_name }}"
         object: /hello-1.0.war
-        src: "{{ local_git_dest }}"/target/hello-1.0.war
+        src: {{ local_git_dest }}/target/hello-1.0.war
         mode: put
         overwrite: yes
 
@@ -152,7 +152,7 @@
       aws_s3:
         bucket: "{{ s3_bucket_name }}"
         object: /hello-1.0.war
-        dest: "{{ tomcat9_webapps }}"/hello-1.0.war
+        dest: {{ tomcat9_webapps }}/hello-1.0.war
         mode: get
 
     - name: Ensure Webapp artifact is purged from S3 bucket
