@@ -20,3 +20,69 @@
       s3_bucket:
         name: "{{ s3_bucket_name }}"
         state: present
+
+    - name: Obtain default VPC information from AWS
+      ec2_vpc_net_facts:
+        filters:
+          "isDefault": "true"
+      register: default_vpc
+
+    - name: Obtain subnets for default VPC
+      ec2_vpc_subnet_facts:
+        filters:
+          vpc-id: "{{ default_vpc['vpcs'][0]['vpc_id'] }}"
+      register: subnet_info
+
+    - set_fact:
+        vpc_id: "{{ default_vpc['vpcs'][0]['vpc_id'] }}"
+        random_subnet: "{{ subnet_info.subnets|map(attribute='id')|list|random }}"
+
+    - name: Create EC2 VPC default security group for Staging and Production instances
+      ec2_group:
+        name: "{{ instance_name }}"
+        description: Security Group for {{ instance_name }}
+        vpc_id: "{{ vpc_id }}"
+        region: "{{ region_name }}"
+        rules:
+          - proto: tcp
+            ports:
+              - 22
+              - 8080
+            cidr_ip: 0.0.0.0/0
+            rule_desc: "Allow SSH for instances and HTTP connections for Tomcat9"
+      register: security_group
+
+    - name: Create two EC2 instances
+      ec2:
+        key_name: "{{ key_name }}"
+        region: "{{ region_name }}"
+        instance_type: "{{ instance_type }}"
+        image: "{{ ami_id }}"
+        vpc_subnet_id: "{{ random_subnet }}"
+        group: "{{ instance_name }}"
+        wait: yes
+        instance_tags:
+          Name: "{{ item }}"
+        count_tag:
+          Name: "{{ item }}"
+        exact_count: 1
+        assign_public_ip: yes
+      with_items: ['staging', 'production']
+      register: ec2
+
+    - debug:
+        var: ec2.results
+
+    - name: Add new instance Staging to host group
+      add_host:
+        name: "{{ item.public_ip }}"
+        groups: "{{ item.tags.Name }}"
+        ansible_ssh_private_key_file: ./keys/{{ key_name }}.pem
+      with_items: "{{ ec2.results[0].instances }}"
+
+    - name: Add new instance Production to host group
+      add_host:
+        name: "{{ item.public_ip }}"
+        groups: "{{ item.tags.Name }}"
+        ansible_ssh_private_key_file: ./keys/{{ key_name }}.pem
+      with_items: "{{ ec2.results[1].instances }}"
