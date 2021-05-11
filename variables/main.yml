@@ -1,4 +1,10 @@
 ---
 region_name: us-east-2
-ami_id: ami-096cb92bb3580c759
+key_name: my_keys2
+ami_id: ami-00399ec92321828f5
 instance_type: t2.micro
+s3_bucket_name: mybacketartem.test14.com
+instance_name: aws-ec2-lesson13
+git_repo: 'https://github.com/boxfuse/boxfuse-sample-java-war-hello.git'
+local_git_dest: /home/user/boxfuse
+tomcat9_webapps: /vars/lib/tomcat9/webapps
