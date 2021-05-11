@@ -6,11 +6,6 @@
   gather_facts: false
 
   tasks:
-    - name: Create a new EC2 key pair for Staging and Production environments
-      ec2_key:
-        name: "{{ key_name }}"
-        region: "{{ region_name }}"
-      register: ec2_key
     - name: Provision a set of instances
       ec2:
         key_name: my_key2
