@@ -1,7 +1,7 @@
 ---
 region_name: us-east-2
 key_name: my_keys
-ami_id: ami-08e6b682a466887dd
+ami_id: ami-00399ec92321828f5
 instance_type: t2.micro
 s3_bucket_name: mybacketartem.test14.com
 instance_name: aws-ec2-lesson13
