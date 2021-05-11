@@ -86,3 +86,77 @@
         groups: "{{ item.tags.Name }}"
         ansible_ssh_private_key_file: ./keys/{{ key_name }}.pem
       with_items: "{{ ec2.results[1].instances }}"
+
+- name: Prepare Staging environment
+  hosts: staging
+  remote_user: ubuntu
+  become: yes
+
+  tasks:
+    - name: Ensure default JDK package is present
+      apt:
+       name: default-jdk
+       state: present
+       update_cache: yes
+
+    - name: Ensure GIT package is present
+      apt:
+       name: git
+       state: present
+
+    - name: Ensure MAVEN package is present
+      apt:
+       name: maven
+       state: present
+
+    - name: Ensure Fusebox git repository cloned to host
+      git:
+       repo: 'https://github.com/boxfuse/boxfuse-sample-java-war-hello.git'
+       dest: /home/pkhramchenkov/boxfuse
+       clone: yes
+
+    - name: Build Webapp
+      command: mvn -f /home/pkhramchenkov/boxfuse/pom.xml clean package
+
+    - name: Ensure Webapp is uploaded to S3 bucket
+      aws_s3:
+        bucket: "{{ s3_bucket_name }}"
+        object: /hello-1.0.war
+        src: /home/pkhramchenkov/boxfuse/target/hello-1.0.war
+        mode: put
+        overwrite: yes
+
+- name: Prepare Production environment
+  hosts: production
+  remote_user: ubuntu
+  become: yes
+
+  tasks:
+    - name: Ensure default JRE package is present
+      apt:
+       name: default-jre
+       state: present
+       update_cache: yes
+
+    - name: Ensure TOMCAT package is present
+      apt:
+       name: tomcat9
+       state: present
+
+    - name: Ensure TOMCAT service started
+      service:
+       name: tomcat9
+       state: started
+
+    - name: Ensure Webapp artifact is downloaded from S3 bucket
+      aws_s3:
+        bucket: "{{ s3_bucket_name }}"
+        object: /hello-1.0.war
+        dest: /vars/lib/tomcat9/webapps/hello-1.0.war
+        mode: get
+
+    - name: Ensure Webapp artifact is purged from S3 bucket
+      aws_s3:
+        bucket: "{{ s3_bucket_name }}"
+        object: /hello-1.0.war
+        mode: delobj
